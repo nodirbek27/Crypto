@@ -2,6 +2,7 @@
 const tableBody = document.getElementById("crypto-body");
 const prevPageBtn = document.getElementById("previous-page");
 const nextPageBtn = document.getElementById("next-page");
+const pageNumber = document.getElementById("page-number");
 
 // Pagination
 let currentPage = 1;
@@ -48,6 +49,11 @@ function createTable(datas) {
     // Coin 24h Change
     const coinChange = document.createElement("td");
     coinChange.textContent = `${data.price_change_percentage_24h * 100}%`;
+    if (data.price_change_percentage_24h < 0) {
+      coinChange.style.color = "red";
+    } else {
+      coinChange.style.color = "green";
+    }
     row.appendChild(coinChange);
 
     // Coin Market Cap
@@ -66,6 +72,21 @@ prevPageBtn.addEventListener("click", () => {
     getData(currentPage);
   }
 });
+
+for (i = 1; i <= maxPage; i++) {
+  const pageNumberBtn = document.createElement("span");
+  pageNumberBtn.style.width = "32px";
+  pageNumberBtn.style.height = "32px";
+  pageNumberBtn.textContent = i;
+  pageNumberBtn.addEventListener("click", () => {
+    currentPage = pageNumberBtn.textContent;
+  });
+  if (currentPage == pageNumberBtn.textContent) {
+      pageNumberBtn.style.backgroundColor = "rgba(255,255,255,0.16)";
+      pageNumberBtn.style.borderRadius = "50%";
+  }
+  pageNumber.appendChild(pageNumberBtn);
+}
 
 nextPageBtn.addEventListener("click", () => {
   if (currentPage < maxPage) {
