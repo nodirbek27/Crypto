@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cryptofolio Watch List</title>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="./css/style.css" />
+  </head>
+  <body>
+    <!-- NAVBAR -->
+    <nav class="container">
+      <a href="index.html" class="logo">CRYPTOFOLIO</a>
+      <div>
+        <select name="currency" id="currency">
+          <option value="usd">USD</option>
+          <option value="eur">EUR</option>
+          <option value="rub">RUB</option>
+        </select>
+        <button class="button">WATCH LIST</button>
+      </div>
+    </nav>
+
+    <!-- HERO -->
+    <div class="hero-wrapper">
+      <div class="hero container"></div>
+    </div>
+
+    <div class="container">
+      <h2>Cryptocurrency Prices by Market Cap</h2>
+      <!-- Search -->
+      <input
+        type="text"
+        id="search-input"
+        placeholder="Search For a Crypto Currency.."
+      />
+
+      <!-- Crypto table -->
+      <table>
+        <thead>
+          <tr>
+            <th>Coin</th>
+            <th>Price</th>
+            <th>24h Change</th>
+            <th>Market Cap</th>
+          </tr>
+        </thead>
+        <tbody id="crypto-body"></tbody>
+      </table>
+
+      <!-- Pagination -->
+      <div class="pagination">
+        <button id="previous-page">
+          <img src="./images/icons/arrowLeft.svg" alt="Previous page icon" />
+        </button>
+        <span id="page-number"></span>
+        <button id="next-page">
+          <img src="./images/icons/arrowRight.svg" alt="Next page icon" />
+        </button>
+      </div>
+    </div>
+
+    <!-- JS -->
+    <script src="./js/script.js"></script>
+  </body>
+</html>
