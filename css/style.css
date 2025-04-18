@@ -82,6 +82,17 @@ nav {
   text-decoration: none;
 }
 
+#currency {
+  margin-right: 15px;
+  padding: 8px;
+  border: 0;
+  background-color: #111;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 19px;
+  color: #ffffff;
+}
+
 /* BUTTON */
 .button {
   display: inline-block;
@@ -148,8 +159,56 @@ thead {
   color: #000000;
 }
 
-td, th {
-  padding: 18px;
+tr {
+  border-bottom: 1px solid #515151;
+}
+
+th {
+  padding: 19px 16px;
+}
+
+td {
+  padding: 16px 16px 27px;
+  text-align: end;
+  width: 260px;
+}
+
+#coin {
+  text-align: start;
+}
+
+.coin-info {
+  text-align: end;
+}
+
+#coinNameWrapper {
+  display: flex;
+  align-items: center;
+  text-align: start;
+}
+
+#coin-image {
+  margin-right: 10px;
+  width: 50px;
+  height: 50px;
+}
+
+#coinSymbolWrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+#coin-symbol {
+  margin-bottom: 3px;
+}
+
+#coin-id {
+  color: #a9a9a9;
+}
+
+#crypto-body {
+  color: #ffffff;
+  font-weight: 400;
 }
 
 /* Pagination */
@@ -157,4 +216,27 @@ td, th {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+#page-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #87ceeb;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0.15px;
+}
+
+#previous-page,
+#next-page {
+  width: 20px;
+  height: 20px;
+  background-color: transparent;
+}
+
+#previous-page img,
+#next-page img {
+  background-color: transparent;
 }
