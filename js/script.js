@@ -6,7 +6,7 @@ const pageNumber = document.getElementById("page-number");
 
 // Pagination
 let currentPage = 1;
-let maxPage = 10;
+let totalPage = 10;
 
 // Get data
 async function getData(page) {
@@ -73,13 +73,14 @@ prevPageBtn.addEventListener("click", () => {
   }
 });
 
-for (i = 1; i <= maxPage; i++) {
+for (i = 1; i <= totalPage; i++) {
   const pageNumberBtn = document.createElement("span");
   pageNumberBtn.style.width = "32px";
   pageNumberBtn.style.height = "32px";
   pageNumberBtn.textContent = i;
   pageNumberBtn.addEventListener("click", () => {
     currentPage = pageNumberBtn.textContent;
+    getData(currentPage)
   });
   if (currentPage == pageNumberBtn.textContent) {
       pageNumberBtn.style.backgroundColor = "rgba(255,255,255,0.16)";
@@ -89,7 +90,7 @@ for (i = 1; i <= maxPage; i++) {
 }
 
 nextPageBtn.addEventListener("click", () => {
-  if (currentPage < maxPage) {
+  if (currentPage < totalPage) {
     currentPage++;
     getData(currentPage);
   }

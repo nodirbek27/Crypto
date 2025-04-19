@@ -257,14 +257,11 @@ td {
   letter-spacing: 0.15px;
 }
 
-#previous-page,
-#next-page {
-  width: 20px;
-  height: 20px;
+.pagination-btn {
+  border: 0;
   background-color: transparent;
 }
 
-#previous-page img,
-#next-page img {
-  background-color: transparent;
+.arrow-icon {
+  width: 10px;
 }
