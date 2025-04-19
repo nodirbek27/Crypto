@@ -244,6 +244,7 @@ td {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding-bottom: 20px;
 }
 
 #page-number {
@@ -257,11 +258,21 @@ td {
   letter-spacing: 0.15px;
 }
 
+#page-number span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
 .pagination-btn {
   border: 0;
   background-color: transparent;
+  width: 20px;
+  margin: 0 12px;
+  cursor: pointer;
 }
 
 .arrow-icon {
-  width: 10px;
+  width: 6px;
 }
