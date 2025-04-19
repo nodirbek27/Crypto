@@ -276,3 +276,33 @@ td {
 .arrow-icon {
   width: 6px;
 }
+
+/* WATCHLIST SIDEBAR */
+#watchlist-sidebar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100vh;
+  width: 0;
+  background-color: #515151;
+  transition: width 0.3s ease;
+  overflow: hidden;
+  z-index: 1000;
+}
+
+#watchlist-sidebar-title {
+  margin-top: 32px;
+  font-family: "Roboto", "Arial", sans-serif;
+  font-weight: 500;
+  font-size: 30px;
+  line-height: 24.5px;
+  letter-spacing: 0.4px;
+  text-align: center;
+  color: #ffffff;
+}
+
+#watchlist-sidebar-body {
+  padding: 38px;
+  color: #ffffff;
+  font-family: "Roboto", "Arial", sans-serif;
+}

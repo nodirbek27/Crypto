@@ -10,14 +10,14 @@ const currencySelect = document.getElementById("currency");
 let currentPage = 1;
 let totalPage = 10;
 let currentData = [];
-let currency = "USD";
+let currentCurrency = "usd";
 
 // Ma'lumotlarni olish
-async function getData(page) {
+async function getData(page, currency) {
   try {
     tableBody.innerHTML = `<tr><td colspan="4">Yuklanmoqda...</td></tr>`;
     const response = await fetch(
-      `https://api.coingecko.com/api/v3/coins/markets?vs_currency=eur&order=gecko_desc&per_page=10&page=${page}&sparkline=false&price_change_percentage=24h`
+      `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&order=gecko_desc&per_page=10&page=${page}&sparkline=false&price_change_percentage=24h`
     );
     if (!response.ok) throw new Error("API so‘rovi muvaffaqiyatsiz");
     const datas = await response.json();
@@ -30,7 +30,7 @@ async function getData(page) {
     tableBody.innerHTML = `<tr><td colspan="4">Ma'lumotlarni yuklashda xato: ${err.message}</td></tr>`;
   }
 }
-getData(currentPage);
+getData(currentPage, currentCurrency);
 
 // Jadval yaratish
 function createTable(datas) {
@@ -68,23 +68,26 @@ function createTable(datas) {
 
     // Coin Price
     const coinPrice = document.createElement("td");
-    coinPrice.textContent = data.current_price.toLocaleString("ru-RU", {
+    coinPrice.textContent = data.current_price.toLocaleString("en-US", {
       style: "currency",
-      currency: "RUB",
+      currency: currentCurrency.toUpperCase(),
     });
     row.appendChild(coinPrice);
 
     // Coin 24h Change
     const coinChange = document.createElement("td");
-    coinChange.textContent = `${data.price_change_percentage_24h.toFixed(2)}%`;
-    coinChange.style.color = data.price_change_percentage_24h < 0 ? "red" : "green";
+    coinChange.textContent = `${
+      data.price_change_percentage_24h > 0 ? "+" : "-"
+    }${data.price_change_percentage_24h.toFixed(2)}%`;
+    coinChange.style.color =
+      data.price_change_percentage_24h < 0 ? "red" : "green";
     row.appendChild(coinChange);
 
     // Coin Market Cap
     const coinMarketCap = document.createElement("td");
     coinMarketCap.textContent = data.market_cap.toLocaleString("en-US", {
       style: "currency",
-      currency: "USD",
+      currency: currentCurrency.toUpperCase(),
     });
     row.appendChild(coinMarketCap);
 
@@ -92,11 +95,11 @@ function createTable(datas) {
   });
 }
 
-// Currency 
+// Currency
 currencySelect.addEventListener("change", () => {
-  console.log(currencySelect.value);
-  
-})
+  currentCurrency = currencySelect.value;
+  getData(currentPage, currentCurrency);
+});
 
 // Qidiruv
 searchInput.addEventListener("input", () => {
@@ -121,7 +124,7 @@ function updatePagination() {
     }
     pageNumberBtn.addEventListener("click", () => {
       currentPage = i;
-      getData(currentPage);
+      getData(currentPage, currentCurrency);
     });
     pageNumber.appendChild(pageNumberBtn);
   }
@@ -131,13 +134,13 @@ function updatePagination() {
 prevPageBtn.addEventListener("click", () => {
   if (currentPage > 1) {
     currentPage--;
-    getData(currentPage);
+    getData(currentPage, currentCurrency);
   }
 });
 
 nextPageBtn.addEventListener("click", () => {
   if (currentPage < totalPage) {
     currentPage++;
-    getData(currentPage);
+    getData(currentPage, currentCurrency);
   }
 });
