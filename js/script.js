@@ -24,7 +24,6 @@ async function getData(page, currency) {
     currentData = datas;
     createTable(datas);
     updatePagination();
-    console.log(datas);
   } catch (err) {
     console.error(err);
     tableBody.innerHTML = `<tr><td colspan="4">Ma'lumotlarni yuklashda xato: ${err.message}</td></tr>`;
@@ -33,12 +32,18 @@ async function getData(page, currency) {
 getData(currentPage, currentCurrency);
 
 // Watchlistga qo‘shish
-function addToWatchlist(coin) {
-  let watchlist = JSON.parse(localStorage.getItem("watchlist")) || [];
-  if (!watchlist.some((item) => item.id === coin.id)) {
-    watchlist.push(coin);
-    localStorage.setItem("watchlist", JSON.stringify(watchlist));
-    renderWatchlist();
+function saveToLocalStorage(coin) {
+  if (!coin || !coin.id) {
+    console.error("Invalid coin data:", coin);
+    return;
+  }
+
+  let selectedCoins = JSON.parse(localStorage.getItem("watchlist")) || [];
+  selectedCoins = selectedCoins.filter((item) => item && item.id && item.name);
+
+  if (!selectedCoins.some((item) => item.id === coin.id)) {
+    selectedCoins.push(coin);
+    localStorage.setItem("watchlist", JSON.stringify(selectedCoins));
   }
 }
 
@@ -109,9 +114,7 @@ function createTable(datas) {
 
     coinChangeEye.addEventListener("click", (e) => {
       e.stopPropagation();
-      addToWatchlist(data);
-      console.log(data);
-      
+      saveToLocalStorage(data);
     });
 
     // Coin Market Cap
@@ -201,36 +204,57 @@ function removeFromWatchlist(coinId) {
   let watchlist = JSON.parse(localStorage.getItem("watchlist")) || [];
   watchlist = watchlist.filter((item) => item.id !== coinId);
   localStorage.setItem("watchlist", JSON.stringify(watchlist));
-  renderWatchlist();
+  getWatchlist();
 }
 
 // Watchlistni ko‘rsatish
-function renderWatchlist() {
+function getWatchlist() {
   const watchlistBody = document.getElementById("watchlist-sidebar-body");
+  const watchlistCoins = document.getElementById("watchlist-coins");
   watchlistBody.innerHTML = "";
+  watchlistCoins.innerHTML = "";
   const watchlist = JSON.parse(localStorage.getItem("watchlist")) || [];
-
-  if (watchlist.length === 0) {
-    watchlistBody.innerHTML = "<p>Watchlist bo‘sh</p>";
-    return;
-  }
 
   watchlist.forEach((coin) => {
     const coinDiv = document.createElement("div");
-    coinDiv.style.padding = "10px";
-    coinDiv.style.borderBottom = "1px solid #fff";
+    coinDiv.style.display = "flex";
+    coinDiv.style.flexDirection = "column";
+    coinDiv.style.alignItems = "center";
+    coinDiv.style.width = "198px";
+    coinDiv.style.height = "248px";
+    coinDiv.style.padding = "15px";
+    coinDiv.style.backgroundColor = "#14161a";
+    coinDiv.style.borderRadius = "25px";
     coinDiv.innerHTML = `
-      <img src="${coin.image}" alt="${
-      coin.id
-    }" style="width: 24px; vertical-align: middle;" />
-      <span>${coin.symbol.toUpperCase()} - ${coin.id}</span>
-      <button style="float: right; cursor: pointer;" onclick="removeFromWatchlist('${
-        coin.id
-      }')">Remove</button>
+      <img src="${coin.image}" alt="${coin.id}" style="width: 120px; margin-bottom: 35px" />
+      <span style="margin-bottom: 15px;">${coin.current_price}</span>
+      <button style="float: right; cursor: pointer; background-color: #ff0000; padding: 4px 16px; color: #fff;" onclick="removeFromWatchlist('${coin.id}')">Remove</button>
     `;
+    console.log(watchlist);
+    watchlistBody.style.display = "flex";
+    watchlistBody.style.alignItems = "center";
+    watchlistBody.style.flexWrap = "wrap";
+    watchlistBody.style.gap = "20px";
+
     watchlistBody.appendChild(coinDiv);
+
+    const coinDivHero = document.createElement("div");
+    coinDivHero.style.display = "flex";
+    coinDivHero.style.flexDirection = "column";
+    coinDivHero.style.alignItems = "center";
+    coinDivHero.style.width = "198px";
+    coinDivHero.style.height = "248px";
+    coinDivHero.innerHTML = `
+      <img src="${coin.image}" alt="${coin.id}" style="width: 80px; margin-bottom: 35px" />
+      <span style="margin-bottom: 15px; color: #fff;">${coin.current_price}</span>
+    `;
+    console.log(watchlist);
+    watchlistCoins.style.display = "flex";
+    watchlistCoins.style.alignItems = "center";
+    watchlistCoins.style.justifyContent = "space-around";
+
+    watchlistCoins.appendChild(coinDivHero);
   });
 }
 
-// Ilova ishga tushganda watchlistni yuklash
-renderWatchlist();
+getWatchlist();
