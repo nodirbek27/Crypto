@@ -32,39 +32,23 @@ async function getData(page, currency) {
 }
 getData(currentPage, currentCurrency);
 
-// Watchlistga qo‘shish
-function saveToLocalStorage(coin) {
-  if (!coin || !coin.id) {
-    console.error("Error:", coin);
-    return;
-  }
-  let selectedCoins = JSON.parse(localStorage.getItem("watchlist"));
-  if (!selectedCoins.some((item) => item.id === coin.id)) {
-    selectedCoins.push(coin);
-    localStorage.setItem("watchlist", JSON.stringify(selectedCoins));
-  }
-}
-
 // Jadval yaratish
 function createTable(datas) {
   tableBody.innerHTML = "";
-
   // Qidiruv
-  const query = searchInput.value;
-  const filteredData = query
+  const filteredData = searchInput.value
     ? datas.filter(
-        (data) => data.id.includes(query) || data.symbol.includes(query)
+        (data) =>
+          data.id.includes(searchInput.value) ||
+          data.symbol.includes(searchInput.value)
       )
     : datas;
-
   if (filteredData.length === 0) {
-    tableBody.innerHTML = `<tr><td colspan="4"><i style="color: #red;">Hech narsa topilmadi</i></td></tr>`;
-    return;
+    return (tableBody.innerHTML = `<tr><td colspan="4" style="color: red;"><i>Bunday coin topilmadi!</i></td></tr>`);
   }
 
   filteredData.forEach((data) => {
     const row = document.createElement("tr");
-
     // Coin Name
     const coinNameWrapper = document.createElement("td");
     coinNameWrapper.innerHTML = `
@@ -76,7 +60,6 @@ function createTable(datas) {
         </div>
       </div>`;
     row.appendChild(coinNameWrapper);
-
     // Coin Price
     const coinPrice = document.createElement("td");
     coinPrice.textContent = data.current_price.toLocaleString("en-US", {
@@ -110,7 +93,6 @@ function createTable(datas) {
     coinChangeDiv.style.justifyContent = "end";
     coinChange.appendChild(coinChangeDiv);
     row.appendChild(coinChange);
-
     coinChangeEye.addEventListener("click", (e) => {
       e.stopPropagation();
       saveToLocalStorage(data);
@@ -198,6 +180,19 @@ document.addEventListener("click", (event) => {
   }
 });
 
+// Watchlistga qo‘shish
+function saveToLocalStorage(coin) {
+  if (!coin || !coin.id) {
+    console.error("Error:", coin);
+    return;
+  }
+  let selectedCoins = JSON.parse(localStorage.getItem("watchlist"));
+  if (!selectedCoins.some((item) => item.id === coin.id)) {
+    selectedCoins.push(coin);
+    localStorage.setItem("watchlist", JSON.stringify(selectedCoins));
+  }
+}
+
 // Watchlistdan o‘chirish
 function removeFromWatchlist(coinId) {
   let watchlist = JSON.parse(localStorage.getItem("watchlist"));
@@ -215,7 +210,7 @@ function getWatchlist(currentCurrency) {
   const watchlist = JSON.parse(localStorage.getItem("watchlist"));
 
   watchlist.forEach((coin) => {
-    // Watchlist sidebar body
+    // --- Watchlist sidebar body ---
     const coinDiv = document.createElement("div");
     coinDiv.style.display = "flex";
     coinDiv.style.flexDirection = "column";
@@ -259,7 +254,7 @@ function getWatchlist(currentCurrency) {
 
     watchlistBody.appendChild(coinDiv);
 
-    // Watchlist hero
+    // --- Watchlist hero ---
     const coinDivHero = document.createElement("div");
     coinDivHero.style.display = "flex";
     coinDivHero.style.flexDirection = "column";
