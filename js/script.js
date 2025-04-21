@@ -15,18 +15,19 @@ let currentCurrency = "usd";
 // Ma'lumotlarni olish
 async function getData(page, currency) {
   try {
-    tableBody.innerHTML = `<tr><td colspan="4">Yuklanmoqda...</td></tr>`;
+    tableBody.innerHTML = "";
     const response = await fetch(
       `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&order=gecko_desc&per_page=10&page=${page}&sparkline=false&price_change_percentage=24h`
     );
-    if (!response.ok) throw new Error("API so‘rovi muvaffaqiyatsiz");
-    const datas = await response.json();
-    currentData = datas;
-    createTable(datas);
-    updatePagination();
+    if (response.ok) {
+      const datas = await response.json();
+      currentData = datas;
+      createTable(datas);
+      updatePagination();
+      getWatchlist(currentCurrency);
+    }
   } catch (err) {
     console.error(err);
-    tableBody.innerHTML = `<tr><td colspan="4">Ma'lumotlarni yuklashda xato: ${err.message}</td></tr>`;
   }
 }
 getData(currentPage, currentCurrency);
@@ -34,13 +35,10 @@ getData(currentPage, currentCurrency);
 // Watchlistga qo‘shish
 function saveToLocalStorage(coin) {
   if (!coin || !coin.id) {
-    console.error("Invalid coin data:", coin);
+    console.error("Error:", coin);
     return;
   }
-
-  let selectedCoins = JSON.parse(localStorage.getItem("watchlist")) || [];
-  selectedCoins = selectedCoins.filter((item) => item && item.id && item.name);
-
+  let selectedCoins = JSON.parse(localStorage.getItem("watchlist"));
   if (!selectedCoins.some((item) => item.id === coin.id)) {
     selectedCoins.push(coin);
     localStorage.setItem("watchlist", JSON.stringify(selectedCoins));
@@ -51,18 +49,16 @@ function saveToLocalStorage(coin) {
 function createTable(datas) {
   tableBody.innerHTML = "";
 
-  // Qidiruv filtri
-  const query = searchInput.value.toLowerCase();
+  // Qidiruv
+  const query = searchInput.value;
   const filteredData = query
     ? datas.filter(
-        (data) =>
-          data.id.toLowerCase().includes(query) ||
-          data.symbol.toLowerCase().includes(query)
+        (data) => data.id.includes(query) || data.symbol.includes(query)
       )
     : datas;
 
   if (filteredData.length === 0) {
-    tableBody.innerHTML = `<tr><td colspan="4">Hech narsa topilmadi</td></tr>`;
+    tableBody.innerHTML = `<tr><td colspan="4"><i style="color: #red;">Hech narsa topilmadi</i></td></tr>`;
     return;
   }
 
@@ -93,8 +89,11 @@ function createTable(datas) {
     const coinChange = document.createElement("td");
     const coinChangeDiv = document.createElement("div");
     // Coin Change eye
+    const watchlist = JSON.parse(localStorage.getItem("watchlist"));
     const coinChangeEye = document.createElement("img");
-    coinChangeEye.src = "../images/icons/eye.png";
+    coinChangeEye.src = watchlist.some((coin) => coin.id === data.id)
+      ? "../images/icons/eye_green.png"
+      : "../images/icons/eye.png";
     coinChangeEye.style.cursor = "pointer";
     // Coin Change Percent
     const coinChangePercent = document.createElement("span");
@@ -115,6 +114,7 @@ function createTable(datas) {
     coinChangeEye.addEventListener("click", (e) => {
       e.stopPropagation();
       saveToLocalStorage(data);
+      getWatchlist(currentCurrency);
     });
 
     // Coin Market Cap
@@ -124,7 +124,6 @@ function createTable(datas) {
       currency: currentCurrency.toUpperCase(),
     });
     row.appendChild(coinMarketCap);
-
     tableBody.appendChild(row);
   });
 }
@@ -184,14 +183,14 @@ nextPageBtn.addEventListener("click", () => {
 const watchlistBtn = document.getElementById("watchlist-button");
 const watchlistSidebar = document.getElementById("watchlist-sidebar");
 
-// Sidebar ochish/yopish toggle
+// Sidebar ochish/yopish
 watchlistBtn.addEventListener("click", (event) => {
   event.stopPropagation();
   watchlistSidebar.style.width = "511px";
   document.body.style.overflow = "hidden";
 });
 
-// Tashqarida bosilganda sidebar yopish
+// Sidebar yopish
 document.addEventListener("click", (event) => {
   if (!watchlistSidebar.contains(event.target)) {
     watchlistSidebar.style.width = "0";
@@ -201,21 +200,22 @@ document.addEventListener("click", (event) => {
 
 // Watchlistdan o‘chirish
 function removeFromWatchlist(coinId) {
-  let watchlist = JSON.parse(localStorage.getItem("watchlist")) || [];
+  let watchlist = JSON.parse(localStorage.getItem("watchlist"));
   watchlist = watchlist.filter((item) => item.id !== coinId);
   localStorage.setItem("watchlist", JSON.stringify(watchlist));
-  getWatchlist();
+  getWatchlist(currentCurrency);
 }
 
 // Watchlistni ko‘rsatish
-function getWatchlist() {
+function getWatchlist(currentCurrency) {
   const watchlistBody = document.getElementById("watchlist-sidebar-body");
   const watchlistCoins = document.getElementById("watchlist-coins");
   watchlistBody.innerHTML = "";
   watchlistCoins.innerHTML = "";
-  const watchlist = JSON.parse(localStorage.getItem("watchlist")) || [];
+  const watchlist = JSON.parse(localStorage.getItem("watchlist"));
 
   watchlist.forEach((coin) => {
+    // Watchlist sidebar body
     const coinDiv = document.createElement("div");
     coinDiv.style.display = "flex";
     coinDiv.style.flexDirection = "column";
@@ -225,12 +225,33 @@ function getWatchlist() {
     coinDiv.style.padding = "15px";
     coinDiv.style.backgroundColor = "#14161a";
     coinDiv.style.borderRadius = "25px";
-    coinDiv.innerHTML = `
-      <img src="${coin.image}" alt="${coin.id}" style="width: 120px; margin-bottom: 35px" />
-      <span style="margin-bottom: 15px;">${coin.current_price}</span>
-      <button style="float: right; cursor: pointer; background-color: #ff0000; padding: 4px 16px; color: #fff;" onclick="removeFromWatchlist('${coin.id}')">Remove</button>
-    `;
-    console.log(watchlist);
+    // Image
+    const coinDivImg = document.createElement("img");
+    coinDivImg.src = coin.image;
+    coinDivImg.style.width = "120px";
+    coinDivImg.style.height = "120px";
+    coinDivImg.style.marginBottom = "35px";
+    coinDiv.appendChild(coinDivImg);
+
+    // Price
+    const coinDivPrice = document.createElement("span");
+    coinDivPrice.textContent = coin.current_price.toLocaleString("en-US", {
+      style: "currency",
+      currency: currentCurrency.toUpperCase(),
+    });
+    coinDivPrice.style.color = "#fff";
+    coinDivPrice.style.marginBottom = "15px";
+    coinDiv.appendChild(coinDivPrice);
+    const coinDivRemoveBtn = document.createElement("button");
+    coinDivRemoveBtn.style.backgroundColor = "#ff0000";
+    coinDivRemoveBtn.style.padding = "4px 16px";
+    coinDivRemoveBtn.style.color = "#fff";
+    coinDivRemoveBtn.textContent = "Remove";
+    coinDivRemoveBtn.style.cursor = "pointer";
+    coinDiv.appendChild(coinDivRemoveBtn);
+    coinDivRemoveBtn.addEventListener("click", () => {
+      removeFromWatchlist(coin.id);
+    });
     watchlistBody.style.display = "flex";
     watchlistBody.style.alignItems = "center";
     watchlistBody.style.flexWrap = "wrap";
@@ -238,23 +259,54 @@ function getWatchlist() {
 
     watchlistBody.appendChild(coinDiv);
 
+    // Watchlist hero
     const coinDivHero = document.createElement("div");
     coinDivHero.style.display = "flex";
     coinDivHero.style.flexDirection = "column";
     coinDivHero.style.alignItems = "center";
-    coinDivHero.style.width = "198px";
-    coinDivHero.style.height = "248px";
-    coinDivHero.innerHTML = `
-      <img src="${coin.image}" alt="${coin.id}" style="width: 80px; margin-bottom: 35px" />
-      <span style="margin-bottom: 15px; color: #fff;">${coin.current_price}</span>
-    `;
-    console.log(watchlist);
+    // Image
+    const coinDivHeroImg = document.createElement("img");
+    coinDivHeroImg.src = coin.image;
+    coinDivHeroImg.style.width = "80px";
+    coinDivHeroImg.style.height = "80px";
+    coinDivHeroImg.style.marginBottom = "10px";
+    coinDivHero.appendChild(coinDivHeroImg);
+
+    const coinChangeDiv = document.createElement("div");
+    // Coin Name
+    const coinChangeName = document.createElement("span");
+    coinChangeName.textContent = coin.symbol;
+    coinChangeName.style.color = "#fff";
+    coinChangeName.style.textTransform = "uppercase";
+    coinChangeName.style.marginRight = "4px";
+    // Coin Change Percent
+    const coinChangePercent = document.createElement("span");
+    coinChangePercent.textContent = `${
+      coin.price_change_percentage_24h > 0 ? "+" : ""
+    }${coin.price_change_percentage_24h.toFixed(2)}%`;
+    coinChangePercent.style.color =
+      coin.price_change_percentage_24h < 0 ? "red" : "green";
+    coinChangePercent.style.width = "70px";
+    coinChangeDiv.style.marginBottom = "4px";
+    coinChangeDiv.appendChild(coinChangeName);
+    coinChangeDiv.appendChild(coinChangePercent);
+    coinDivHero.appendChild(coinChangeDiv);
+    // Price
+    const coinDivHeroPrice = document.createElement("span");
+    coinDivHeroPrice.style.fontSize = "22px";
+    coinDivHeroPrice.style.fontWeight = "500";
+    coinDivHeroPrice.textContent = coin.current_price.toLocaleString("en-US", {
+      style: "currency",
+      currency: currentCurrency.toUpperCase(),
+    });
+    coinDivHeroPrice.style.color = "#fff";
+    coinDivHeroPrice.style.marginBottom = "15px";
+    coinDivHero.appendChild(coinDivHeroPrice);
     watchlistCoins.style.display = "flex";
     watchlistCoins.style.alignItems = "center";
     watchlistCoins.style.justifyContent = "space-around";
-
     watchlistCoins.appendChild(coinDivHero);
   });
 }
 
-getWatchlist();
+getWatchlist(currentCurrency);
